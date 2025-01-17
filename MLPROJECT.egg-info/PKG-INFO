@@ -1,8 +1,0 @@
-Metadata-Version: 2.1
-Name: MLPROJECT
-Version: 0.0.1
-Author: Jasjeev
-Author-email: jasjeev1@gmail.com
-Requires-Dist: seaborn
-Requires-Dist: pandas
-Requires-Dist: numpy
