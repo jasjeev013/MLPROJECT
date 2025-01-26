@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from src.exception import CustomException
+from sklearn.model_selection import GridSearchCV
 
 import dill
 from sklearn.metrics import r2_score
@@ -19,17 +20,33 @@ def save_object(file_path,obj):
     except Exception as e:
         raise CustomException("Error in Saving Object", e)
     
-def evaluate_models(X_train, y_train, X_test, y_test, models: dict):
-    model_report = {}
-    for model_name, model in models.items():
-        try:
-            logging.info(f"Training model: {model_name}")
-            model.fit(X_train, y_train)
-            y_pred = model.predict(X_test)
-            r2 = r2_score(y_test, y_pred)
-            model_report[model_name] = r2
-            logging.info(f"Model: {model_name} trained successfully")
-        except Exception as e:
-            logging.error(f"Error while training model: {model_name}")
-            logging.error(e)
-    return model_report
+def evaluate_models(X_train, y_train,X_test,y_test,models,param):
+    try:
+        report = {}
+
+        for i in range(len(list(models))):
+            model = list(models.values())[i]
+            para=param[list(models.keys())[i]]
+
+            gs = GridSearchCV(model,para,cv=3)
+            gs.fit(X_train,y_train)
+
+            model.set_params(**gs.best_params_)
+            model.fit(X_train,y_train)
+
+            #model.fit(X_train, y_train)  # Train model
+
+            y_train_pred = model.predict(X_train)
+
+            y_test_pred = model.predict(X_test)
+
+            train_model_score = r2_score(y_train, y_train_pred)
+
+            test_model_score = r2_score(y_test, y_test_pred)
+
+            report[list(models.keys())[i]] = test_model_score
+
+        return report
+
+    except Exception as e:
+        raise CustomException(e, sys)
